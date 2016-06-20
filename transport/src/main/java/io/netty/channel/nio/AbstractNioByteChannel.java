@@ -98,9 +98,9 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
         @Override
         public final void read() {
-            final ChannelConfig config = config();
-            final ChannelPipeline pipeline = pipeline();
-            final ByteBufAllocator allocator = config.getAllocator();
+            final ChannelConfig config = config(); //得到config对象、pipeline对象
+            final ChannelPipeline pipeline = pipeline();//得到对应的管道对象
+            final ByteBufAllocator allocator = config.getAllocator();//实际的内存分配器---
             final RecvByteBufAllocator.Handle allocHandle = recvBufAllocHandle();
             allocHandle.reset(config);
 
@@ -108,21 +108,22 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             boolean close = false;
             try {
                 do {
-                    byteBuf = allocHandle.allocate(allocator);
-                    allocHandle.lastBytesRead(doReadBytes(byteBuf));
-                    if (allocHandle.lastBytesRead() <= 0) {
+                    byteBuf = allocHandle.allocate(allocator); //每次都重新分配一个buffer
+                    allocHandle.lastBytesRead(doReadBytes(byteBuf)); //读数据到buffer
+                    if (allocHandle.lastBytesRead() <= 0) {//发生了读取事件，但是读取的长度是负数，也就是没数据可读
                         // nothing was read. release the buffer.
                         byteBuf.release();
                         byteBuf = null;
-                        close = allocHandle.lastBytesRead() < 0;
+                        close = allocHandle.lastBytesRead() < 0;//是否进行关闭，关键要看读取到的数据的长度是否为-1；
                         break;
                     }
 
                     allocHandle.incMessagesRead(1);
                     readPending = false;
+                    //发起读取事件---如果是第一次积累数据的话，那么就会将当前的bytebuf作为累积对象，供继续使用
                     pipeline.fireChannelRead(byteBuf);
                     byteBuf = null;
-                } while (allocHandle.continueReading());
+                } while (allocHandle.continueReading()); //return bytesToRead > 0 && attemptBytesRead == lastBytesRead;
 
                 allocHandle.readComplete();
                 pipeline.fireChannelReadComplete();
@@ -153,9 +154,9 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         boolean setOpWrite = false;
         for (;;) {
             Object msg = in.current();
-            if (msg == null) {
+            if (msg == null) { //如果消息为空，
                 // Wrote all messages.
-                clearOpWrite();
+                clearOpWrite(); //清楚读操作位，之后buffer就不能读了
                 // Directly return here so incompleteWrite(...) is not called.
                 return;
             }
@@ -164,7 +165,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
                 ByteBuf buf = (ByteBuf) msg;
                 int readableBytes = buf.readableBytes();
                 if (readableBytes == 0) {
-                    in.remove();
+                    in.remove();  //从循环数组里移除这条消息
                     continue;
                 }
 
@@ -175,13 +176,13 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
                 }
                 for (int i = writeSpinCount - 1; i >= 0; i --) {
                     int localFlushedAmount = doWriteBytes(buf);
-                    if (localFlushedAmount == 0) {
+                    if (localFlushedAmount == 0) { //为0表示已经没有字符可读
                         setOpWrite = true;
                         break;
                     }
 
                     flushedAmount += localFlushedAmount;
-                    if (!buf.isReadable()) {
+                    if (!buf.isReadable()) { //判断读指针是否小于写指针
                         done = true;
                         break;
                     }

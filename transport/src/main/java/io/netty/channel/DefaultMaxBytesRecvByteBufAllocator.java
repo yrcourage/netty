@@ -57,10 +57,10 @@ public class DefaultMaxBytesRecvByteBufAllocator implements MaxBytesRecvByteBufA
 
         @Override
         public void lastBytesRead(int bytes) {
-            lastBytesRead = bytes;
+            lastBytesRead = bytes;  //上一次读取的字节数
             // Ignore if bytes is negative, the interface contract states it will be detected externally after call.
             // The value may be "invalid" after this point, but it doesn't matter because reading will be stopped.
-            bytesToRead -= bytes;
+            bytesToRead -= bytes; //减掉上一次读了的剩下的
         }
 
         @Override

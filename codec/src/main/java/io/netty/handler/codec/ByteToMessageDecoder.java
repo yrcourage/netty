@@ -228,17 +228,22 @@ public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter 
      */
     protected void handlerRemoved0(ChannelHandlerContext ctx) throws Exception { }
 
+    public static void main(String[] args){
+        CodecOutputList out = CodecOutputList.newInstance();
+        System.out.println(out.size());
+    }
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof ByteBuf) {
-            CodecOutputList out = CodecOutputList.newInstance();
+            CodecOutputList out = CodecOutputList.newInstance();  //out初始化长度为0
             try {
                 ByteBuf data = (ByteBuf) msg;
                 first = cumulation == null;
-                if (first) {
+                if (first) {  //如果cumulation里没有半包，则直接把data赋给cumulation
                     cumulation = data;
                 } else {
-                    cumulation = cumulator.cumulate(ctx.alloc(), cumulation, data);
+                    cumulation = cumulator.cumulate(ctx.alloc(), cumulation, data); //如果有半包，则把data追加到cumulation里
                 }
                 callDecode(ctx, cumulation, out);
             } catch (DecoderException e) {
@@ -246,11 +251,11 @@ public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter 
             } catch (Throwable t) {
                 throw new DecoderException(t);
             } finally {
-                if (cumulation != null && !cumulation.isReadable()) {
+                if (cumulation != null && !cumulation.isReadable()) { //如果一次性把cumulation读完了，则释放cumulation
                     numReads = 0;
                     cumulation.release();
                     cumulation = null;
-                } else if (++ numReads >= discardAfterReads) {
+                } else if (++ numReads >= discardAfterReads) { //如果解码完cumulation里还有剩的,则缩小cumulation，即将之前解码用掉的字符删掉
                     // We did enough reads already try to discard some bytes so we not risk to see a OOME.
                     // See https://github.com/netty/netty/issues/4275
                     numReads = 0;
@@ -259,7 +264,7 @@ public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter 
 
                 int size = out.size();
                 decodeWasNull = !out.insertSinceRecycled();
-                fireChannelRead(ctx, out, size);
+                fireChannelRead(ctx, out, size); //这一步会重新调用channelRead()
                 out.recycle();
             }
         } else {
@@ -387,7 +392,7 @@ public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter 
             while (in.isReadable()) {
                 int outSize = out.size();
 
-                if (outSize > 0) {
+                if (outSize > 0) {//如果out的长度不为0,那么这个handler不是第一个handler，in是由前面的handler传过来的,那么直接
                     fireChannelRead(ctx, out, outSize);
                     out.clear();
 
@@ -413,15 +418,15 @@ public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter 
                     break;
                 }
 
-                if (outSize == out.size()) {
+                if (outSize == out.size()) {//如果out列表的长度没有变化
                     if (oldInputLength == in.readableBytes()) {
-                        break;
+                        break;  //没有消费ByteBuf，则退出循环
                     } else {
-                        continue;
+                        continue; //消费了ByteBuf，解码继续进行
                     }
                 }
 
-                if (oldInputLength == in.readableBytes()) {
+                if (oldInputLength == in.readableBytes()) {//没有消费ByteBuf却改变了out的长度
                     throw new DecoderException(
                             StringUtil.simpleClassName(getClass()) +
                             ".decode() did not read anything but decoded a message.");

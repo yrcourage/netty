@@ -197,7 +197,7 @@ public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
 
     /**
      * Creates a new instance.
-     *
+     *对于超长帧，直接丢弃
      * @param maxFrameLength
      *        the maximum length of the frame.  If the length of the frame is
      *        greater than this value, {@link TooLongFrameException} will be
@@ -355,7 +355,7 @@ public class LengthFieldBasedFrameDecoder extends ByteToMessageDecoder {
      *                          be created.
      */
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
-        if (discardingTooLongFrame) {
+        if (discardingTooLongFrame) {//是否超长帧还没丢弃完
             long bytesToDiscard = this.bytesToDiscard;
             int localBytesToDiscard = (int) Math.min(bytesToDiscard, in.readableBytes());
             in.skipBytes(localBytesToDiscard);

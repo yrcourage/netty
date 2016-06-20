@@ -45,7 +45,11 @@ public final class MathUtil {
      * {@code false} if this would result in an index out of bounds exception.
      */
     public static boolean isOutOfBounds(int index, int length, int capacity) {
-        return (index | length | (index + length) | (capacity - (index + length))) < 0;
+        return (index | length | (index + length) | (capacity - (index + length))) < 0;  //保证四个数大大于0，负数的或运算结果永远是负数
+    }
+
+    public static void main(String[] args){
+        System.out.println(-2|-4);
     }
 
     /**

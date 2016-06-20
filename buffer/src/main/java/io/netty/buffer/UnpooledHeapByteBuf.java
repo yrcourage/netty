@@ -29,12 +29,13 @@ import java.nio.channels.ScatteringByteChannel;
 
 /**
  * Big endian Java heap buffer implementation.
+ * 大端java堆内buffer实现
  */
 public class UnpooledHeapByteBuf extends AbstractReferenceCountedByteBuf {
 
-    private final ByteBufAllocator alloc;
+    private final ByteBufAllocator alloc;  //内存分配器
     byte[] array;
-    private ByteBuffer tmpNioBuf;
+    private ByteBuffer tmpNioBuf;  //java自带的nio ByteBuffer
 
     /**
      * Creates a new heap buffer with a newly allocated byte array.
@@ -53,13 +54,13 @@ public class UnpooledHeapByteBuf extends AbstractReferenceCountedByteBuf {
      * @param maxCapacity the max capacity of the underlying byte array
      */
     protected UnpooledHeapByteBuf(ByteBufAllocator alloc, byte[] initialArray, int maxCapacity) {
-        this(alloc, initialArray, 0, initialArray.length, maxCapacity);
+        this(alloc, initialArray, 0, initialArray.length, maxCapacity);  //writerIndex设置为initialArray的末尾
     }
 
     private UnpooledHeapByteBuf(
             ByteBufAllocator alloc, byte[] initialArray, int readerIndex, int writerIndex, int maxCapacity) {
 
-        super(maxCapacity);
+        super(maxCapacity);  //将this.maxCapacity设置为maxCapacity
 
         if (alloc == null) {
             throw new NullPointerException("alloc");
@@ -67,12 +68,12 @@ public class UnpooledHeapByteBuf extends AbstractReferenceCountedByteBuf {
         if (initialArray == null) {
             throw new NullPointerException("initialArray");
         }
-        if (initialArray.length > maxCapacity) {
+        if (initialArray.length > maxCapacity) {   //当前数组的长度不可以比最大容量小
             throw new IllegalArgumentException(String.format(
                     "initialCapacity(%d) > maxCapacity(%d)", initialArray.length, maxCapacity));
         }
 
-        this.alloc = alloc;
+        this.alloc = alloc;  //设置分配器
         setArray(initialArray);
         setIndex(readerIndex, writerIndex);
     }
@@ -99,12 +100,12 @@ public class UnpooledHeapByteBuf extends AbstractReferenceCountedByteBuf {
 
     @Override
     public int capacity() {
-        ensureAccessible();
+        ensureAccessible(); //检查引用计数，为0抛出异常
         return array.length;
     }
 
     @Override
-    public ByteBuf capacity(int newCapacity) {
+    public ByteBuf capacity(int newCapacity) { //调整buffer当前的容量上限
         ensureAccessible();
         if (newCapacity < 0 || newCapacity > maxCapacity()) {
             throw new IllegalArgumentException("newCapacity: " + newCapacity);
@@ -121,11 +122,11 @@ public class UnpooledHeapByteBuf extends AbstractReferenceCountedByteBuf {
             if (readerIndex < newCapacity) {
                 int writerIndex = writerIndex();
                 if (writerIndex > newCapacity) {
-                    writerIndex(writerIndex = newCapacity);
+                    writerIndex(writerIndex = newCapacity);  //如果当前的writerIndex比newCapacity大，将writerIndex设置为newCapacity大小
                 }
                 System.arraycopy(array, readerIndex, newArray, readerIndex, writerIndex - readerIndex);
             } else {
-                setIndex(newCapacity, newCapacity);
+                setIndex(newCapacity, newCapacity);//如果readerIndex比newCapacity大，将读写指针都设置为newCapacity大小
             }
             setArray(newArray);
         }
@@ -161,7 +162,7 @@ public class UnpooledHeapByteBuf extends AbstractReferenceCountedByteBuf {
     @Override
     public ByteBuf getBytes(int index, ByteBuf dst, int dstIndex, int length) {
         checkDstIndex(index, length, dstIndex, dst.capacity());
-        if (dst.hasMemoryAddress()) {
+        if (dst.hasMemoryAddress()) { //
             PlatformDependent.copyMemory(array, index, dst.memoryAddress() + dstIndex, length);
         } else if (dst.hasArray()) {
             getBytes(index, dst.array(), dst.arrayOffset() + dstIndex, length);

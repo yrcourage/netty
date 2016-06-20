@@ -124,7 +124,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
     private final SelectStrategy selectStrategy;
 
-    private volatile int ioRatio = 50;
+    private volatile int ioRatio = 50;  //io线程所占的时间百分比
     private int cancelledKeys;
     private boolean needsToSelectAgain;
 
