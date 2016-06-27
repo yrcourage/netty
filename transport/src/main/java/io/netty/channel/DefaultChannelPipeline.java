@@ -190,10 +190,11 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     @Override
     public final ChannelPipeline addLast(EventExecutorGroup group, String name, ChannelHandler handler) {
         final AbstractChannelHandlerContext newCtx;
-        synchronized (this) {
-            checkMultiplicity(handler);
+        synchronized (this) { //同步的
+            checkMultiplicity(handler);  //检查重复
 
-            newCtx = newContext(group, filterName(name, handler), handler);
+            newCtx = newContext(group, filterName(name, handler), handler); //添加handler本质还是添加handler对应的handlerContext
+            //handlerContext会有一个handler属性。在pipeline中handlerContext以链表形式存在
 
             addLast0(newCtx);
 
@@ -902,6 +903,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public final ChannelPipeline fireChannelRead(Object msg) {
+        //在pipeline中，fireChannelRead其实只是调用头channelHandlerContext的read方法
         AbstractChannelHandlerContext.invokeChannelRead(head, msg);
         return this;
     }

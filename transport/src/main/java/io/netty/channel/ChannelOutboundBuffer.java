@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 /**
  * (Transport implementors only) an internal data structure used by {@link AbstractChannel} to store its pending
  * outbound write requests.
- * <p>
+ * <p>一个用来被AbstractChannel存储其上行写请求的数据结构
  * All methods must be called by a transport implementation from an I/O thread, except the following ones:
  * <ul>
  * <li>{@link #size()} and {@link #isEmpty()}</li>
@@ -63,14 +63,15 @@ public final class ChannelOutboundBuffer {
 
     private final Channel channel;
 
+
     // Entry(flushedEntry) --> ... Entry(unflushedEntry) --> ... Entry(tailEntry)
-    //
+    //flushedEntry是放在list头部的，中间是unflushedEntry
     // The Entry that is the first in the linked-list structure that was flushed
     private Entry flushedEntry;
     // The Entry which is the first unflushed in the linked-list structure
     private Entry unflushedEntry;
     // The Entry which represents the tail of the buffer
-    private Entry tailEntry;
+    private Entry tailEntry;  //尾指针
     // The number of flushed entries that are not written yet
     private int flushed;
 
@@ -117,11 +118,11 @@ public final class ChannelOutboundBuffer {
      */
     public void addMessage(Object msg, int size, ChannelPromise promise) {
         Entry entry = Entry.newInstance(msg, size, total(msg), promise);
-        if (tailEntry == null) {
+        if (tailEntry == null) {   //尾指针为空，说明当前环形数组里没数据
             flushedEntry = null;
             tailEntry = entry;
         } else {
-            Entry tail = tailEntry;
+            Entry tail = tailEntry;  //当前环形数组里有数据，则把新的Entry添加到队列尾部
             tail.next = entry;
             tailEntry = entry;
         }
@@ -131,12 +132,13 @@ public final class ChannelOutboundBuffer {
 
         // increment pending bytes after adding message to the unflushed arrays.
         // See https://github.com/netty/netty/issues/1619
-        incrementPendingOutboundBytes(size, false);
+        incrementPendingOutboundBytes(size, false);  //增长writeBufferSize
     }
 
     /**
      * Add a flush to this {@link ChannelOutboundBuffer}. This means all previous added messages are marked as flushed
      * and so you will be able to handle them.
+     * 之前添加的所有消息会被标记为flushed，因此你可以处理他们
      */
     public void addFlush() {
         // There is no need to process all entries if there was already a flush before and no new messages
@@ -179,7 +181,7 @@ public final class ChannelOutboundBuffer {
 
         long newWriteBufferSize = TOTAL_PENDING_SIZE_UPDATER.addAndGet(this, size);
         if (newWriteBufferSize >= channel.config().getWriteBufferHighWaterMark()) {
-            setUnwritable(invokeLater);
+            setUnwritable(invokeLater); //如果加上新的size超过了配置的writeBufferHighWaterMarsk值，则
         }
     }
 

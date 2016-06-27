@@ -129,7 +129,7 @@ public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter 
         }
     };
 
-    ByteBuf cumulation;
+    ByteBuf cumulation;   //这个属性是用来存储
     private Cumulator cumulator = MERGE_CUMULATOR;
     private boolean singleDecode;
     private boolean decodeWasNull;
@@ -262,9 +262,9 @@ public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter 
                     discardSomeReadBytes();
                 }
 
-                int size = out.size();
+                int size = out.size();//如果size为0，那么不就导致阻塞在这里了么？
                 decodeWasNull = !out.insertSinceRecycled();
-                fireChannelRead(ctx, out, size); //这一步会重新调用channelRead()
+                fireChannelRead(ctx, out, size); //这一步会根据size多次调用下一个handlerContext的channelRead方法
                 out.recycle();
             }
         } else {
@@ -392,7 +392,7 @@ public abstract class ByteToMessageDecoder extends ChannelInboundHandlerAdapter 
             while (in.isReadable()) {
                 int outSize = out.size();
 
-                if (outSize > 0) {//如果out的长度不为0,那么这个handler不是第一个handler，in是由前面的handler传过来的,那么直接
+                if (outSize > 0) {//如果out的长度不为0,那么这个handler不是第一个handler，in是由前面的handler传过来的,那么直接将out传递给下一个handler
                     fireChannelRead(ctx, out, outSize);
                     out.clear();
 

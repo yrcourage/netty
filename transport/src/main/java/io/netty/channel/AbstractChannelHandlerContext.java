@@ -54,8 +54,8 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
      */
     private static final int INIT = 0;
 
-    private final boolean inbound;
-    private final boolean outbound;
+    private final boolean inbound; //这个参数表示这个handlerContext对应的handler是不是一个InboundHandler
+    private final boolean outbound; //同上
     private final DefaultChannelPipeline pipeline;
     private final String name;
 
@@ -922,11 +922,12 @@ abstract class AbstractChannelHandlerContext extends DefaultAttributeMap
     private AbstractChannelHandlerContext findContextInbound() {
         AbstractChannelHandlerContext ctx = this;
         do {
-            ctx = ctx.next;
-        } while (!ctx.inbound);
+            ctx = ctx.next; //这个语句总会执行一遍
+        } while (!ctx.inbound);  //这个循环就是找到下一个inboundHandler对应的handlerContext
         return ctx;
     }
 
+    //同上
     private AbstractChannelHandlerContext findContextOutbound() {
         AbstractChannelHandlerContext ctx = this;
         do {

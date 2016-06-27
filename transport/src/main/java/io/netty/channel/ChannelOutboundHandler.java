@@ -73,6 +73,7 @@ public interface ChannelOutboundHandler extends ChannelHandler {
 
     /**
      * Intercepts {@link ChannelHandlerContext#read()}.
+     * 拦截ChannelHandlerContext的read方法，其实好像没什么handler会对这个方法重写，这个方法就是只调用ctx.read()
      */
     void read(ChannelHandlerContext ctx) throws Exception;
 
@@ -85,6 +86,7 @@ public interface ChannelOutboundHandler extends ChannelHandler {
      * @param msg               the message to write
      * @param promise           the {@link ChannelPromise} to notify once the operation completes
      * @throws Exception        thrown if an error accour
+     * 因为是outboundHandler，所以这个方法还是要重写的。write最后也会调用ctx.write()方法
      */
     void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception;
 

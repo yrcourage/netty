@@ -54,7 +54,7 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
     /**
      * One or more listeners. Can be a {@link GenericFutureListener} or a {@link DefaultFutureListeners}.
      * If {@code null}, it means either 1) no listeners were added yet or 2) all listeners were notified.
-     *
+     *如果为null，表示还没有添加任何listener或所有的listener没有被通知
      * Threading - synchronized(this). We must support adding listeners when there is no EventExecutor.
      */
     private Object listeners;
@@ -79,7 +79,9 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
      *        It is assumed this executor will protect against {@link StackOverflowError} exceptions.
      *        The executor may be used to avoid {@link StackOverflowError} by executing a {@link Runnable} if the stack
      *        depth exceeds a threshold.
-     *
+     *EventExecutor用来通知promise一旦任务完成了
+     * 我们假设executor可以避免StackOverflowError
+     * executor可以通过执行一个Runnable来避免StackOverflowError,如果栈深度超过了阈值
      */
     public DefaultPromise(EventExecutor executor) {
         this.executor = checkNotNull(executor, "executor");

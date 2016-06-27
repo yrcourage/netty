@@ -775,6 +775,8 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 // If the outboundBuffer is null we know the channel was closed and so
                 // need to fail the future right away. If it is not null the handling of the rest
                 // will be done in flush0()
+                //如果outboundBuffer为null那么意味着channel关闭了，所以我们要马上将future设置为fail
+                //如果不是null，那么
                 // See https://github.com/netty/netty/issues/2362
                 safeSetFailure(promise, CLOSED_CHANNEL_EXCEPTION);
                 // release message now to prevent resource-leak

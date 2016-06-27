@@ -77,6 +77,7 @@ public interface ChannelInboundInvoker {
      * This will result in having the {@link ChannelInboundHandler#channelRead(ChannelHandlerContext, Object)}
      * method  called of the next {@link ChannelInboundHandler} contained in the  {@link ChannelPipeline} of the
      * {@link Channel}.
+     * 这将会导致调用在ChannelPipeline中的下一个ChannelInboundHandler的channelRead方法
      */
     ChannelInboundInvoker fireChannelRead(Object msg);
 

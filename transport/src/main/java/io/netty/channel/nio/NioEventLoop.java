@@ -109,7 +109,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     /**
      * The NIO {@link Selector}.
      */
-    Selector selector;
+    Selector selector;   //IO复用器，用于处理IO链接
     private SelectedSelectionKeySet selectedKeys;
 
     private final SelectorProvider provider;
@@ -150,10 +150,12 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             throw new ChannelException("failed to open a new selector", e);
         }
 
-        if (DISABLE_KEYSET_OPTIMIZATION) {
+        if (DISABLE_KEYSET_OPTIMIZATION) {  //如果没有开启selectedKeys优化功能,直接返回
             return selector;
         }
 
+        //如果开启了，需通过反射的方式从Selector实例中获取selectedKeys和publicSelectedKeys，将上述两个成员变量摄这位可写
+        //通过反射的方式使用Netty构造deselectedKeys包装类selectedKeySet将原JDK的selectedKeys替换掉
         try {
             SelectedSelectionKeySet selectedKeySet = new SelectedSelectionKeySet();
 
