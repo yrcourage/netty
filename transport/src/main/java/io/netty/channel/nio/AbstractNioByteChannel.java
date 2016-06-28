@@ -108,6 +108,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
             boolean close = false;
             try {
                 do {
+                    //netty默认的接收缓冲区大小是动态的，每次会进行调整，如果一次分配的小了，那就触发多次fireChannelRead
                     byteBuf = allocHandle.allocate(allocator); //每次都重新分配一个buffer
                     allocHandle.lastBytesRead(doReadBytes(byteBuf)); //读数据到buffer
                     if (allocHandle.lastBytesRead() <= 0) {//发生了读取事件，但是读取的长度是负数，也就是没数据可读
