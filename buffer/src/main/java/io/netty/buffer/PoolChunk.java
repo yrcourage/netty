@@ -21,22 +21,30 @@ package io.netty.buffer;
  *
  * Notation: The following terms are important to understand the code
  * > page  - a page is the smallest unit of memory chunk that can be allocated
+ * page-page是能被分配的最小内存单元
  * > chunk - a chunk is a collection of pages
+ * chunk是pages的集合
  * > in this code chunkSize = 2^{maxOrder} * pageSize
+ * 在这份代码里chunkSize=2的{maxOrder}次方*pageSize
  *
  * To begin we allocate a byte array of size = chunkSize
+ * 开始我们会分配一个大小为chunkSize的数组
  * Whenever a ByteBuf of given size needs to be created we search for the first position
  * in the byte array that has enough empty space to accommodate the requested size and
  * return a (long) handle that encodes this offset information, (this memory segment is then
  * marked as reserved so it is always used by exactly one ByteBuf and no more)
+ *当需要分配一个特定大小的ByteBuff时，我们首先搜索造这个数组里第一个有足够空间的位置来容纳请求的
+ * 空间。并且返回一个编码了这个偏移信息的handle（这个内存区域就会被标记为已预订，并且会一直被一个ByteBuff使用）
  *
  * For simplicity all sizes are normalized according to PoolArena#normalizeCapacity method
+ * 为了简化，所有的sizes都根据PoolArea的normalizeCapacity方法进行了归一化
  * This ensures that when we request for memory segments of size >= pageSize the normalizedCapacity
  * equals the next nearest power of 2
+ * 这样保证了每次请求的size>=pageSize时，normalizedCapacity等于下一个最近的size的2倍
  *
  * To search for the first offset in chunk that has at least requested size available we construct a
  * complete balanced binary tree and store it in an array (just like heaps) - memoryMap
- *
+ *为了搜索chunk中第一个符合请求size的offset，我们构造了一个平衡二叉树，以数组的形式存储（就像堆一样）
  * The tree looks like this (the size of each node being mentioned in the parenthesis)
  *
  * depth=0        1 node (chunkSize)

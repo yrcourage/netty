@@ -207,7 +207,7 @@ public final class Unpooled {
         }
     }
 
-    /**
+    /**创建一个新的buffer包含了指定的buffer的可读bytes
      * Creates a new buffer which wraps the specified buffer's readable bytes.
      * A modification on the specified buffer's content will be visible to the
      * returned buffer.
