@@ -21,6 +21,7 @@ import io.netty.channel.CombinedChannelDuplexHandler;
 /**
  * A combination of {@link HttpRequestDecoder} and {@link HttpResponseEncoder}
  * which enables easier server side HTTP implementation.
+ * HttpRequestDecoder和HttpResponseEncoder的合集。一个更容易使用的服务器端HTTP实现
  *
  * @see HttpClientCodec
  */

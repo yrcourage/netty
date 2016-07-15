@@ -82,10 +82,10 @@ public class DefaultSocketChannelConfig extends DefaultChannelConfig
         if (option == SO_KEEPALIVE) {
             return (T) Boolean.valueOf(isKeepAlive());
         }
-        if (option == SO_REUSEADDR) {
+        if (option == SO_REUSEADDR) { //一般来说，一个端口释放后会等待两分钟之后才能再被使用，SO_REUSEADDR是让端口释放后立即就可以被再次使用
             return (T) Boolean.valueOf(isReuseAddress());
         }
-        if (option == SO_LINGER) {
+        if (option == SO_LINGER) { //是否立即关闭socket，是否不等未发送完的数据发送完
             return (T) Integer.valueOf(getSoLinger());
         }
         if (option == IP_TOS) {
